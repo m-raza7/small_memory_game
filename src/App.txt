@@ -1,0 +1,136 @@
+// import axios from "axios"
+// import { useState, useEffect } from "react";
+// import "./App.css"
+
+// const Api_url = 'https://jsonplaceholder.typicode.com/users';
+
+// function App() {
+//   const [users, setUsers] = useState([])
+
+//   useEffect(() => {
+//     getUsers();
+//   }, [])
+
+//   const getUsers = async () => {
+//     const res = await axios.get(Api_url)
+//     const users = await res.data;
+//     console.log(users);
+//     setUsers(users)
+//   }
+
+
+//   return (
+//     <>
+//       <h1>Hello World!</h1>
+//       <div className="container">
+//         {users.map((item)=>(
+//         <div className="card" key={item.id}>
+//           <h2>{item.name}</h2>
+//           <p>{item.email}</p>
+//         </div>
+//       ))}
+//       </div>
+//     </>
+//   )
+// }
+
+// export default App
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function App() {
+  const [users, setUsers] = useState([]);
+  const [name, setName] = useState("");
+
+  // ✅ GET USERS
+  const getUsers = async () => {
+    try {
+      const res = await axios.get("https://jsonplaceholder.typicode.com/users");
+      setUsers(res.data);
+    } catch (error) {
+      console.log("GET error:", error);
+    }
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+
+  // ✅ CREATE USER
+  const createUser = async () => {
+    try {
+      alert("hello")
+      if (name.trim() === "") {
+        alert("Please enter a name!");
+        return; // ✅ stop submit
+      }
+      const res = await axios.post("https://jsonplaceholder.typicode.com/users", {
+        name: name,
+      });
+
+      setUsers([...users, res.data]); // add to UI
+      setName("");
+    } catch (error) {
+      console.log("POST error:", error);
+    }
+    finally{
+      
+    }
+  };
+
+  // ✅ UPDATE USER
+  const updateUser = async (id) => {
+    try {
+      const res = await axios.put(`https://jsonplaceholder.typicode.com/users/${id}`, {
+        name: "Updated Name",
+      });
+
+      setUsers(users.map((u) => (u.id === id ? { ...u, name: res.data.name } : u)));
+    } catch (error) {
+      console.log("PUT error:", error);
+    }
+  };
+
+  // ✅ DELETE USER
+  const deleteUser = async (id) => {
+    try {
+      await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`);
+      setUsers(users.filter((u) => u.id !== id));
+    } catch (error) {
+      console.log("DELETE error:", error);
+    }
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>CRUD Users</h1>
+
+      {/* CREATE */}
+      <input
+        type="text"
+        placeholder="Enter name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <button onClick={createUser}>Add User</button>
+
+      <hr />
+
+      {/* READ */}
+      {users.map((user) => (
+        <div key={user.id} style={{ marginBottom: "10px" }}>
+          <b>{user.name}</b>
+
+          <button onClick={() => updateUser(user.id)} style={{ marginLeft: "10px" }}>
+            Update
+          </button>
+
+          <button onClick={() => deleteUser(user.id)} style={{ marginLeft: "10px" }}>
+            Delete
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
